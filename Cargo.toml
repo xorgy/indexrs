@@ -1,6 +1,6 @@
 [package]
 name = "indexrs"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Aaron Muir Hamilton <aaron@correspondwith.me>"]
 license = "ISC"
 keywords = ["full-text-search", "index", "search"]
