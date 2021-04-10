@@ -100,6 +100,20 @@ mod tests {
 
         assert_eq!(baar.query("oof"), fooo.query("oof"));
     }
+
+    #[test]
+    fn test_start_end_sensitive() {
+        let mut baar = crate::InvertIndex::<&str>::default();
+
+        baar.insert("blazed", &crate::start_end_str("Adiaeresis"));
+        baar.insert("crazed", &crate::start_end_str("Aacute"));
+        baar.insert("pleased", &crate::start_end_str("A"));
+
+        assert_eq!(baar.query(&crate::start_end_str("A"))[0], "pleased");
+        assert_eq!(baar.query(&crate::start_end_str("Ate"))[0], "crazed");
+        assert_eq!(baar.query(&crate::start_end_str("Ais"))[0], "blazed");
+        assert_eq!(baar.query(&crate::start_end_str("Ad"))[0], "blazed");
+    }
 }
 
 #[derive(Clone)]
@@ -268,4 +282,9 @@ pub fn mkgrams(s: &str, depth: usize) -> HashSet<String> {
         }
     }
     gs
+}
+
+/// Add start and end markers to a query/index string to make results sensitive to the start and end
+pub fn start_end_str(s: &str) -> String {
+    ["\u{0002}", s, "\u{0003}"].join("")
 }
