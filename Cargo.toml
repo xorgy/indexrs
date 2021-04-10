@@ -1,0 +1,13 @@
+[package]
+name = "indexrs"
+version = "0.1.0"
+authors = ["Aaron Muir Hamilton <aaron@correspondwith.me>"]
+license = "ISC"
+keywords = ["full-text-search", "index", "search"]
+repository = "https://github.com/xorgy/indexrs"
+description = "A simple, inefficient multi-language search index."
+edition = "2018"
+categories = ["text-processing"]
+
+[dependencies]
+unicode-normalization = "0.1.17"
