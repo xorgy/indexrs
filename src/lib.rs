@@ -114,6 +114,42 @@ mod tests {
         assert_eq!(baar.query(&crate::start_end_str("Ais"))[0], "blazed");
         assert_eq!(baar.query(&crate::start_end_str("Ad"))[0], "blazed");
     }
+
+    #[test]
+    fn test_multibyte() {
+        let mut baar = crate::InvertIndex::<&str>::default();
+
+        baar.insert("chickity", &crate::start_end_str("中ity中國，這中華的雞"));
+        baar.insert(
+            "kurosawa",
+            &crate::start_end_str("like 黒沢 I make mad films"),
+        );
+        baar.insert(
+            "sushi",
+            &crate::start_end_str("I like the 寿司 'cause it's never touched a frying pan"),
+        );
+
+        assert_eq!(baar.query(&crate::start_end_str("寿司"))[0], "sushi");
+        assert_eq!(baar.query(&crate::start_end_str("黒沢"))[0], "kurosawa");
+        assert_eq!(baar.query(&crate::start_end_str("中華的雞"))[0], "chickity");
+    }
+
+    #[test]
+    fn test_sub_grapheme_match() {
+        let mut baar = crate::InvertIndex::<&str>::default();
+
+        baar.insert("제11조 ①", &crate::start_end_str("제11조 ① 모든 국민은 법 앞에 평등하다. 누구든지 성별·종교 또는 사회적 신분에 의하여 정치적·경제적·사회적·문화적 생활의 모든 영역에 있어서 차별을 받지 아니한다."));
+        baar.insert("-e", &crate::start_end_str("법률에"));
+        baar.insert("-i", &crate::start_end_str("법률이"));
+
+        assert_eq!(
+            baar.query(&crate::start_end_str("모든 국민은 법 앞에 평등하ᄃ"))[0],
+            "제11조 ①"
+        );
+        assert_eq!(baar.query(&crate::start_end_str("법률이"))[0], "-i");
+        assert_eq!(baar.query(&crate::start_end_str("법률에"))[0], "-e");
+        assert_eq!(baar.query(&crate::start_end_str("법률이"))[1], "-e");
+    }
 }
 
 #[derive(Clone)]
@@ -271,13 +307,13 @@ where
 /// ```
 pub fn mkgrams(s: &str, depth: usize) -> HashSet<String> {
     let mut gs = HashSet::<String>::new();
-    let norm: String = s.nfd().collect::<String>().to_lowercase();
+    let norm: Vec<char> = s.nfd().collect::<String>().to_lowercase().chars().collect();
     let len: usize = norm.len();
     let rdepth: usize = cmp::min(depth, len);
     for i in 0..len {
         for j in 0..rdepth {
             if let Some(slicette) = norm.get(i..=(i + j + 1)) {
-                gs.insert(String::from(slicette));
+                gs.insert(slicette.into_iter().collect::<String>());
             }
         }
     }
